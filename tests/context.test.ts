@@ -4,7 +4,7 @@
 import "../../setup-jsdom"
 
 import { describe, it, expect, vi } from "vitest"
-import { canvasContext, resizeCanvas } from "@obvia/utilities"
+import { canvasContext, resizeCanvas } from "@obvia/webgl"
 
 describe("webgl suite", () => {
   describe("canvasContext()", () => {
