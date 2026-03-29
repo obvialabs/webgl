@@ -162,3 +162,256 @@ if (location !== -1) {
 // Strict mode: throws an error if attribute is missing
 const locationStrict = validateAttribute(context, program, { name: "aPosition", strict: true })
 ```
+
+## Buffers
+
+By centralizing validation and using a consistent options‑object pattern, it reduces boilerplate,
+eliminates code duplication, and ensures a clean, predictable API for creating, updating, deleting,
+and binding buffers.
+
+### API
+
+#### createBuffer
+Creates a generic WebGL buffer and uploads data.
+
+- `context` – WebGL rendering context
+- `options` – Buffer configuration
+  - `target` – Buffer target (`ARRAY_BUFFER` or `ELEMENT_ARRAY_BUFFER`)
+  - `data` – Vertex or index data (typed array)
+  - `usage` – Buffer usage hint (default: `STATIC_DRAW`)
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vertices = new Float32Array([0,0, 1,0, 0,1])
+const vboDefault = createBuffer(context, {
+  target: context.ARRAY_BUFFER,
+  data: vertices
+})
+
+// Strict mode: throws an error if buffer cannot be created
+const indices = new Uint16Array([0,1,2, 2,1,3])
+const iboStrict = createBuffer(context, {
+  target: context.ELEMENT_ARRAY_BUFFER,
+  data: indices,
+  strict: true
+})
+
+// Custom usage hint (dynamic draw)
+const dynamicVertices = new Float32Array([0,0, 1,0, 0,1])
+const vboDynamic = createBuffer(context, {
+  target: context.ARRAY_BUFFER,
+  data: dynamicVertices,
+  usage: context.DYNAMIC_DRAW
+})
+```
+
+#### createQuadBuffer
+Creates a buffer for a full‑screen quad.
+
+- `context` – WebGL rendering context
+- `position` – Attribute location index for vertex positions
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vboDefault = createQuadBuffer(context, positionLocation)
+context.drawArrays(context.TRIANGLE_STRIP, 0, 4)
+
+// Strict mode: throws an error if buffer cannot be created
+const vboStrict = createQuadBuffer(context, positionLocation, { strict: true })
+context.drawArrays(context.TRIANGLE_STRIP, 0, 4)
+
+// With index buffer
+const vbo = createQuadBuffer(context, positionLocation)
+const ibo = createQuadIndexBuffer(context)
+context.drawElements(context.TRIANGLES, 6, context.UNSIGNED_SHORT, 0)
+```
+
+
+#### createQuadIndexBuffer
+Creates an index buffer for a full‑screen quad.
+
+- `context` – WebGL rendering context
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vbo = createQuadBuffer(context, positionLocation)
+const iboDefault = createQuadIndexBuffer(context)
+context.drawElements(context.TRIANGLES, 6, context.UNSIGNED_SHORT, 0)
+
+// Strict mode: throws an error if buffer cannot be created
+const iboStrict = createQuadIndexBuffer(context, { strict: true })
+context.drawElements(context.TRIANGLES, 6, context.UNSIGNED_SHORT, 0)
+```
+
+
+#### createTriangleBuffer
+Creates a buffer for a full‑screen triangle.
+
+- `context` – WebGL rendering context
+- `position` – Attribute location index for vertex positions
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vboDefault = createTriangleBuffer(context, positionLocation)
+context.drawArrays(context.TRIANGLES, 0, 3)
+
+// Strict mode: throws an error if buffer cannot be created
+const vboStrict = createTriangleBuffer(context, positionLocation, { strict: true })
+context.drawArrays(context.TRIANGLES, 0, 3)
+```
+
+
+#### createTriangleIndexBuffer
+Creates an index buffer for a full‑screen triangle.
+
+- `context` – WebGL rendering context
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vbo = createTriangleBuffer(context, positionLocation)
+const iboDefault = createTriangleIndexBuffer(context)
+context.drawElements(context.TRIANGLES, 3, context.UNSIGNED_SHORT, 0)
+
+// Strict mode: throws an error if buffer cannot be created
+const iboStrict = createTriangleIndexBuffer(context, { strict: true })
+context.drawElements(context.TRIANGLES, 3, context.UNSIGNED_SHORT, 0)
+```
+
+
+#### createCubeBuffer
+Creates a buffer for a unit cube.
+
+- `context` – WebGL rendering context
+- `position` – Attribute location index for vertex positions
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vboDefault = createCubeBuffer(context, positionLocation)
+const iboDefault = createCubeIndexBuffer(context)
+context.drawElements(context.TRIANGLES, 36, context.UNSIGNED_SHORT, 0)
+
+// Strict mode: throws an error if buffer cannot be created
+const vboStrict = createCubeBuffer(context, positionLocation, { strict: true })
+const iboStrict = createCubeIndexBuffer(context, { strict: true })
+context.drawElements(context.TRIANGLES, 36, context.UNSIGNED_SHORT, 0)
+```
+
+
+#### createCubeIndexBuffer
+Creates an index buffer for a cube.
+
+- `context` – WebGL rendering context
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer cannot be created (default: false)
+
+```ts
+// Silent mode (default): returns null if buffer cannot be created
+const vboDefault = createCubeBuffer(context, positionLocation)
+const iboDefault = createCubeIndexBuffer(context)
+context.drawElements(context.TRIANGLES, 36, context.UNSIGNED_SHORT, 0)
+
+// Strict mode: throws an error if buffer cannot be created
+const vboStrict = createCubeBuffer(context, positionLocation, { strict: true })
+const iboStrict = createCubeIndexBuffer(context, { strict: true })
+context.drawElements(context.TRIANGLES, 36, context.UNSIGNED_SHORT, 0)
+```
+
+
+
+#### updateBuffer
+Updates an existing WebGL buffer with new data.
+
+- `context` – WebGL rendering context
+- `buffer` – Existing buffer to update
+- `options` – Buffer configuration
+  - `target` – Buffer target (`ARRAY_BUFFER` or `ELEMENT_ARRAY_BUFFER`)
+  - `data` – New typed array data to upload
+  - `usage` – Buffer usage hint (default: `STATIC_DRAW`)
+  - `strict` – Throw error if buffer binding fails (default: false)
+
+```ts
+// Replace the entire buffer with new vertices
+const newVertices = new Float32Array([0,0, 1,0, 1,1])
+updateBuffer(context, vbo, {
+  target: context.ARRAY_BUFFER,
+  data: newVertices
+})
+
+// Resize the buffer with more vertices (old data discarded)
+const largerVertices = new Float32Array([0,0, 1,0, 1,1, 0,1])
+updateBuffer(context, vbo, {
+  target: context.ARRAY_BUFFER,
+  data: largerVertices,
+  usage: context.DYNAMIC_DRAW
+})
+
+// Strict mode: throws an error if buffer binding fails
+updateBuffer(context, vbo, {
+  target: context.ARRAY_BUFFER,
+  data: newVertices,
+  strict: true
+})
+```
+
+
+#### updateBufferPartial
+Partially updates an existing WebGL buffer with new data.
+
+- `context` – WebGL rendering context
+- `buffer` – Existing buffer to update
+- `options` – Buffer configuration
+  - `target` – Buffer target (`ARRAY_BUFFER` or `ELEMENT_ARRAY_BUFFER`)
+  - `data` – Typed array containing new data
+  - `offset` – Byte offset in the buffer where data should be written (default: 0)
+  - `strict` – Throw error if buffer binding fails (default: false)
+
+```ts
+// Replace only the first vertex (two floats) in the buffer
+const newVertex = new Float32Array([0.5, 0.5])
+updateBufferPartial(context, vbo, {
+  target: context.ARRAY_BUFFER,
+  data: newVertex,
+  offset: 0
+})
+
+// Replace the 3rd vertex (offset = 2 * 4 bytes = 8)
+const anotherVertex = new Float32Array([1.0, 1.0])
+updateBufferPartial(context, vbo, {
+  target: context.ARRAY_BUFFER,
+  data: anotherVertex,
+  offset: 8,
+  strict: true
+})
+```
+
+
+#### deleteBuffer
+Deletes a WebGL buffer and frees GPU memory.
+
+- `context` – WebGL rendering context
+- `buffer` – Buffer object to delete
+- `options` – Optional configuration
+  - `strict` – Throw error if buffer deletion fails (default: false)
+
+```ts
+// Silent mode (default): ignores if buffer is null
+deleteBuffer(context, vbo)
+
+// Strict mode: throws an error if buffer is null or deletion fails
+deleteBuffer(context, vbo, { strict: true })
+
+// Delete both vertex and index buffers when cleaning up
+deleteBuffer(context, vbo)
+deleteBuffer(context, ibo)
+```
