@@ -7,7 +7,7 @@ export interface CanvasContextOptions extends WebGLContextAttributes {
    *
    * @default false
    */
-  silently?: boolean
+  strict?: boolean
 
   /**
    * Attempt to create a WebGL2 context first, fallback to WebGL1 if unavailable
@@ -44,7 +44,7 @@ export interface CanvasContextOptions extends WebGLContextAttributes {
  */
 export function canvasContext(
   canvas: HTMLCanvasElement,
-  options: CanvasContextOptions & { strict?: boolean } = {}
+  options: CanvasContextOptions = {}
 ): WebGLRenderingContext | WebGL2RenderingContext | null {
   const {
     webGL2 = false,

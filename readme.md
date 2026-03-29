@@ -2,6 +2,12 @@
 
 ## Canvas
 
+By centralizing context creation and resize logic, it provides a unified, predictable API for
+obtaining WebGL contexts and managing canvas scaling. This reduces repetitive setup code, ensures
+consistent handling of device pixel ratios, and simplifies error management with optional strict mode.
+
+### API
+
 #### canvasContext
 Safely obtain a WebGL rendering context from a canvas element.
 
