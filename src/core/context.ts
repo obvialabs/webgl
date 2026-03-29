@@ -24,58 +24,52 @@ export interface CanvasContextOptions extends WebGLContextAttributes {
  * - `canvas` – Target canvas element to initialize WebGL on
  * - `options` – Optional canvas context options (extends WebGL context attributes)
  *    - `*` – Inherits all standard WebGL context attributes
- *    - `silently` – Suppress error logging if WebGL cannot be created (default: false)
- *    - `webgl2` – Attempt to create a WebGL2 context first, fallback to WebGL1 if unavailable (default: false)
+ *    - `webGL2` – Attempt to create a WebGL2 context first, fallback to WebGL1 if unavailable (default: false)
+ *    - `strict` – Throw error if WebGL cannot be created (default: false)
  *
  * **Usage**
  * ```ts
- * // Default usage
- * const gl = canvasContext(canvas)
+ * // Silent mode (default): returns null if WebGL cannot be created
+ * const ctxDefault = canvasContext(canvas)
+ *
+ * // Strict mode: throws an error if WebGL cannot be created
+ * const ctxStrict = canvasContext(canvas, { strict: true })
  *
  * // Custom options
- * const gl = canvasContext(canvas, { antialias: false, depth: false, silently: true })
+ * const ctxCustom = canvasContext(canvas, { antialias: false, depth: false })
  *
  * // Try WebGL2 first, fallback to WebGL1
- * const gl2 = canvasContext(canvas, { webgl2: true })
- *
- * if (!gl) {
- *   // Handle fallback manually if needed
- * }
+ * const ctxWebGL2 = canvasContext(canvas, { webGL2: true })
  * ```
  */
 export function canvasContext(
   canvas: HTMLCanvasElement,
-  options: CanvasContextOptions = {}
+  options: CanvasContextOptions & { strict?: boolean } = {}
 ): WebGLRenderingContext | WebGL2RenderingContext | null {
   const {
-    silently = false,
     webGL2 = false,
+    strict = false,
     ...attributes
   } = options
 
-  // Attempt to obtain a WebGL2 context if requested
-  let webGL: WebGLRenderingContext | WebGL2RenderingContext | null = null
+  let context: WebGLRenderingContext | WebGL2RenderingContext | null = null
+
   if (webGL2) {
-    webGL = canvas.getContext("webgl2", attributes) as WebGL2RenderingContext | null
+    context = canvas.getContext("webgl2", attributes) as WebGL2RenderingContext | null
+  }
+  if (!context) {
+    context = canvas.getContext("webgl", attributes)
   }
 
-  // Fallback to WebGL1 if WebGL2 is not available
-  if (!webGL) {
-    webGL = canvas.getContext("webgl", attributes)
-  }
-
-  // If WebGL is not supported and silently is not enabled, log an error
-  if (!webGL && !silently) {
-    console.error(
+  if (!context && strict) {
+    throw new Error(
       "Failed to initialize WebGL context. " +
       "This browser or device may not support WebGL, " +
-      "or the provided context attributes are not compatible.",
-      { canvas, options }
+      "or the provided context attributes are not compatible."
     )
   }
 
-  // Return the WebGLRenderingContext if available, otherwise null
-  return webGL
+  return context
 }
 
 /**

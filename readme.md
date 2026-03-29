@@ -7,16 +7,19 @@ Safely obtain a WebGL rendering context from a canvas element.
 
 - `canvas` – Target canvas element to initialize WebGL on
 - `options` – Optional configuration (extends WebGL context attributes)
-  - `silently` – Suppress error logging if WebGL cannot be created (default: false)
+  - `strict` – Throw error if WebGL cannot be created (default: false)
   - `webGL2` – Attempt to create a WebGL2 context first, fallback to WebGL1 (default: false)
   - `*` – Inherits all standard WebGL context attributes
 
 ```ts
-// Default usage (WebGL1, logs error if unsupported)
+// Silent mode (default): returns null if WebGL cannot be created
 const ctxDefault = canvasContext(canvas)
 
-// Custom options (disable antialias, suppress errors)
-const ctxCustom = canvasContext(canvas, { antialias: false, depth: false, silently: true })
+// Strict mode: throws an error if WebGL cannot be created
+const ctxStrict = canvasContext(canvas, { strict: true })
+
+// Custom options (disable antialias, depth buffer)
+const ctxCustom = canvasContext(canvas, { antialias: false, depth: false })
 
 // Try WebGL2 first, fallback to WebGL1
 const ctxWebGL2 = canvasContext(canvas, { webGL2: true })
