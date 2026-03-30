@@ -15,7 +15,7 @@ jobs:
   # Job (Build node 22.x)
   build-node22:
     # Job name shown in GitHub Actions UI
-    name: Build package (Node 22.x)
+    name: Node 22.x
     # Runner environment (Ubuntu)
     runs-on: ubuntu-latest
     # Job steps
@@ -41,7 +41,7 @@ jobs:
 
   # Job (Build node 23.x)
   build-node23:
-    name: Build package (Node 23.x)
+    name: Node 23.x
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
 
   # Job (Build node 24.x)
   build-node24:
-    name: Build package (Node 24.x)
+    name: Node 24.x
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
