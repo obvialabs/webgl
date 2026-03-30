@@ -1,5 +1,5 @@
 # Workflow name
-name: Publish package
+name: Publish Package
 
 # Workflow conditions
 on:

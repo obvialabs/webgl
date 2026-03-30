@@ -1,5 +1,5 @@
 # Workflow name
-name: Build package
+name: Build Package
 
 # Workflow conditions
 on:

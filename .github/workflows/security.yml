@@ -1,0 +1,42 @@
+# Workflow name
+name: Run CodeQL
+
+# Workflow conditions
+on:
+  # Run on pushes to main and develop branches
+  push:
+    branches: [ main ]
+  # Run on pull requests targeting main and develop
+  pull_request:
+    branches: [ main ]
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+# Workflow jobs
+jobs:
+  # Job (CodeQL Analysis)
+  analyze:
+    # Job name shown in GitHub Actions UI
+    name: CodeQL analysis
+    # Runner environment (Ubuntu)
+    runs-on: ubuntu-latest
+
+    # Job steps
+    steps:
+      # Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Initialize CodeQL for JavaScript/TypeScript
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      # Autobuild project (CodeQL tries to build automatically)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      # Perform CodeQL analysis
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
