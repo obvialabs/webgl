@@ -24,7 +24,7 @@ export interface Uniform3Options extends BaseOptions {
  * - `program` – Linked shader program
  * - `options` – Configuration object
  *    - `name` – Uniform name in the shader
- *    - `value` – Value to assign
+ *    - `value` – Value to assign (tuple or array of length 3)
  *    - `strict` – Throw error if uniform location is not found (default: false)
  *
  * **Usage**
@@ -58,6 +58,13 @@ export interface Uniform3Options extends BaseOptions {
  *    name: "uIndices",
  *    value: new Int32Array([1, 2, 3])
  * })
+ *
+ * // Strict mode example
+ * setUniform3(context, program, {
+ *    name: "uMissing",
+ *    value: [0, 0, 0],
+ *    strict: true
+ * })
  * ```
  */
 export function setUniform3(
@@ -84,14 +91,14 @@ export function setUniform3(
   }
 
   // Boolean array → map true/false to 1/0 and call uniform3i
-  if (Array.isArray(value) && typeof value[0] === "boolean") {
+  if (Array.isArray(value) && value.length === 3 && typeof value[0] === "boolean") {
     const [x, y, z] = value as boolean[]
     context.uniform3i(location, x ? 1 : 0, y ? 1 : 0, z ? 1 : 0)
     return
   }
 
   // Number tuple → if all integers use uniform3i, otherwise use uniform3f
-  if (Array.isArray(value) && typeof value[0] === "number") {
+  if (Array.isArray(value) && value.length === 3 && typeof value[0] === "number") {
     const [x, y, z] = value as [number, number, number]
     if (Number.isInteger(x) && Number.isInteger(y) && Number.isInteger(z)) {
       context.uniform3i(location, x, y, z)
@@ -117,9 +124,9 @@ export function setUniform3(
   handleError({
     subject : "uniform",
     context : {
-      action: "setUniform3",
-      result: `Unsupported uniform3 value type for "${name}"`
+      action  : "setUniform3",
+      result  : `Unsupported uniform value type for "${name}"`
     },
-    strict  : strict
+    strict : strict
   })
 }

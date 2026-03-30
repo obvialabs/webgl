@@ -23,8 +23,8 @@ export interface UniformSamplerOptions extends BaseOptions {
  * - `context` – Target WebGL rendering context
  * - `program` – Linked shader program
  * - `options` – Configuration object
- *    - `name` – Uniform name in the shader
- *    - `unit` – Texture unit index
+ *    - `name` – Sampler uniform name in the shader
+ *    - `unit` – Texture unit index (must be >= 0)
  *    - `strict` – Throw error if uniform location is not found (default: false)
  *
  * **Usage**
@@ -53,6 +53,19 @@ export function setUniformSampler(
 ): void {
   const { name, unit, strict = false } = options
 
+  // Validate texture unit index
+  if (unit < 0) {
+    handleError({
+      subject : "uniform",
+      context : {
+        action  : "setUniformSampler",
+        result  : `Invalid texture unit index "${unit}" for sampler "${name}"`
+      },
+      strict  : strict
+    })
+    return
+  }
+
   // Find the uniform location in the shader program
   const location = context.getUniformLocation(program, name)
 
@@ -62,7 +75,7 @@ export function setUniformSampler(
       subject : "uniform",
       context : {
         action  : "setUniformSampler",
-        result  : `Uniform "${name}" not found in shader program`
+        result  : `Sampler uniform "${name}" not found in shader program`
       },
       strict  : strict
     })

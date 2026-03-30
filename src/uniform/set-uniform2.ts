@@ -24,7 +24,7 @@ export interface Uniform2Options extends BaseOptions {
  * - `program` – Linked shader program
  * - `options` – Configuration object
  *    - `name` – Uniform name in the shader
- *    - `value` – Value to assign
+ *    - `value` – Value to assign (tuple or array of length 2)
  *    - `strict` – Throw error if uniform location is not found (default: false)
  *
  * **Usage**
@@ -58,6 +58,13 @@ export interface Uniform2Options extends BaseOptions {
  *    name: "uIndices",
  *    value: new Int32Array([1, 2])
  * })
+ *
+ * // Strict mode example
+ * setUniform2(context, program, {
+ *    name: "uMissing",
+ *    value: [0, 0],
+ *    strict: true
+ * })
  * ```
  */
 export function setUniform2(
@@ -84,14 +91,14 @@ export function setUniform2(
   }
 
   // Boolean array → map true/false to 1/0 and call uniform2i
-  if (Array.isArray(value) && typeof value[0] === "boolean") {
+  if (Array.isArray(value) && value.length === 2 && typeof value[0] === "boolean") {
     const [x, y] = value as boolean[]
     context.uniform2i(location, x ? 1 : 0, y ? 1 : 0)
     return
   }
 
   // Number tuple → if both integers use uniform2i, otherwise use uniform2f
-  if (Array.isArray(value) && typeof value[0] === "number") {
+  if (Array.isArray(value) && value.length === 2 && typeof value[0] === "number") {
     const [x, y] = value as [number, number]
     if (Number.isInteger(x) && Number.isInteger(y)) {
       context.uniform2i(location, x, y)
@@ -118,7 +125,7 @@ export function setUniform2(
     subject : "uniform",
     context : {
       action  : "setUniform2",
-      result  : `Unsupported uniform2 value type for "${name}"`
+      result  : `Unsupported uniform value type for "${name}"`
     },
     strict : strict
   })

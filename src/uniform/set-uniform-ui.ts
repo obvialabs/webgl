@@ -65,6 +65,19 @@ export function setUniformUi(
 ): void {
   const { name, values, strict = false } = options
 
+  // Validate values (must be non-negative)
+  if (values.some(v => v < 0)) {
+    handleError({
+      subject : "uniform",
+      context : {
+        action  : "setUniformUi",
+        result  : `Invalid negative value in unsigned integer uniform "${name}"`
+      },
+      strict  : strict
+    })
+    return
+  }
+
   // Get the uniform location from the shader program by name
   const location = context.getUniformLocation(program, name)
 
@@ -74,7 +87,7 @@ export function setUniformUi(
       subject : "uniform",
       context : {
         action  : "setUniformUi",
-        result  : `Uniform "${name}" not found in shader program`
+        result  : `Unsigned integer uniform "${name}" not found in shader program`
       },
       strict  : strict
     })

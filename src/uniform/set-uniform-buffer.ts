@@ -20,7 +20,7 @@ export interface UniformBufferOptions extends BaseOptions {
  * Bind a buffer to a uniform binding point in a WebGL2 shader program
  *
  * **Parameters**
- * - `context` – Target WebGL2 rendering context
+ * - `context` – Target WebGL2 rendering context (not supported in WebGL1)
  * - `options` – Configuration object
  *    - `buffer` – WebGLBuffer to bind
  *    - `index` – Binding point index

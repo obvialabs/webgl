@@ -31,7 +31,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   # Job (Build package)
   build:
-    name: Build package
+    name: Build Package
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the repository code
@@ -64,13 +64,9 @@ jobs:
             package.json
             license.md
 
-
-
-
-
   # Job (Security check with CodeQL)
   check:
-    name: Check security (CodeQL)
+    name: Code Quality
     runs-on: ubuntu-latest
     # Wait until upload-artifact job finishes
     needs: [build]
@@ -97,7 +93,7 @@ jobs:
 
   # Job (Publish to npm)
   publish:
-    name: Publish package (NPM)
+    name: Publish Package
     runs-on: ubuntu-latest
     # Wait until both upload-artifact and CodeQL check jobs finish
     needs: [build, check]

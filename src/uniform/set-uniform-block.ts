@@ -20,7 +20,7 @@ export interface UniformBlockOptions extends BaseOptions {
  * Bind a uniform block to a binding point in a WebGL2 shader program
  *
  * **Parameters**
- * - `context` – Target WebGL2 rendering context
+ * - `context` – Target WebGL2 rendering context (not supported in WebGL1)
  * - `program` – Linked shader program
  * - `options` – Configuration object
  *    - `name` – Uniform block name in the shader

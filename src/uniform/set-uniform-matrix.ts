@@ -27,7 +27,7 @@ export interface UniformMatrixOptions extends BaseOptions {
  * Set a matrix uniform (mat2, mat3, mat4, or WebGL2-only non-square variants) in a WebGL shader program
  *
  * **Parameters**
- * - `context` – Target WebGL rendering context
+ * - `context` – Target WebGL rendering context (WebGL2 required for non-square matrices)
  * - `program` – Linked shader program
  * - `options` – Configuration object
  *    - `name` – Uniform name in the shader
@@ -121,7 +121,7 @@ export function setUniformMatrix(
       subject : "uniform",
       context : {
         action  :"setUniformMatrix",
-        result  :`Uniform info for "${name}" not found`
+        result  :`Uniform info for "${name}" not found`,
       },
       strict  : strict
     })
@@ -155,7 +155,7 @@ export function setUniformMatrix(
         subject : "uniform",
         context : {
           action  :"setUniformMatrix",
-          result  :`Unsupported matrix length "${matrix.length}" for uniform "${name}"`
+          result  :`Unsupported matrix type for uniform "${name}"`
         },
         strict  : strict
       })

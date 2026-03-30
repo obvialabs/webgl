@@ -58,6 +58,13 @@ export interface Uniform1Options extends BaseOptions {
  *    name: "uIndices",
  *    value: new Int32Array([1, 2, 3])
  * })
+ *
+ * // Strict mode: throw error if uniform not found
+ * setUniform1(context, program, {
+ *    name: "uMissing",
+ *    value: 0,
+ *    strict: true
+ * })
  * ```
  */
 export function setUniform1(

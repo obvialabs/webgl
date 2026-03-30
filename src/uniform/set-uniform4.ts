@@ -58,6 +58,13 @@ export interface Uniform4Options extends BaseOptions {
  *    name: "uIndices",
  *    value: new Int32Array([1, 2, 3, 4])
  * })
+ *
+ * // Strict mode example
+ * setUniform4(context, program, {
+ *   name: "uMissing",
+ *   value: [0, 0, 0, 0],
+ *   strict: true
+ * })
  * ```
  */
 export function setUniform4(
@@ -84,14 +91,14 @@ export function setUniform4(
   }
 
   // Boolean array → map true/false to 1/0 and call uniform4i
-  if (Array.isArray(value) && typeof value[0] === "boolean") {
+  if (Array.isArray(value) && value.length === 4 && typeof value[0] === "boolean") {
     const [x, y, z, w] = value as boolean[]
     context.uniform4i(location, x ? 1 : 0, y ? 1 : 0, z ? 1 : 0, w ? 1 : 0)
     return
   }
 
   // Number tuple → if all integers use uniform4i, otherwise use uniform4f
-  if (Array.isArray(value) && typeof value[0] === "number") {
+  if (Array.isArray(value) && value.length === 4 && typeof value[0] === "number") {
     const [x, y, z, w] = value as [number, number, number, number]
     if (Number.isInteger(x) && Number.isInteger(y) && Number.isInteger(z) && Number.isInteger(w)) {
       context.uniform4i(location, x, y, z, w)
@@ -118,8 +125,8 @@ export function setUniform4(
     subject : "uniform",
     context : {
       action  : "setUniform4",
-      result  : `Unsupported uniform4 value type for "${name}"`
+      result  : `Unsupported uniform value type for "${name}"`
     },
-    strict  : strict
+    strict : strict
   })
 }
