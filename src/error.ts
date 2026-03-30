@@ -1,53 +1,20 @@
-export class ShaderError extends Error {
-  constructor(action: string, details: string, infoLog?: string) {
-    super(`Shader ${action} failed: ${details}${infoLog ? " | Log: " + infoLog : ""}`)
-    this.name = "ShaderError"
-  }
+/**
+ * Context object for WebGL errors
+ */
+export type WebGLErrorContext = {
+  action: string
+  result: string
+  details?: string
+  file?: string
+  line?: number
+  column?: number
 }
 
-export class ProgramError extends Error {
-  constructor(action: string, details: string, infoLog?: string) {
-    super(`Program ${action} failed: ${details}${infoLog ? " | Log: " + infoLog : ""}`)
-    this.name = "ProgramError"
-  }
-}
-
-export class BufferError extends Error {
-  constructor(action: string, details: string) {
-    super(`Buffer ${action} failed: ${details}`)
-    this.name = "BufferError"
-  }
-}
-
-export class AttributeError extends Error {
-  constructor(action: string, details: string) {
-    super(`Attribute ${action} failed: ${details}`)
-    this.name = "AttributeError"
-  }
-}
-
-export class UniformError extends Error {
-  constructor(action: string, details: string) {
-    super(`Uniform ${action} failed: ${details}`)
-    this.name = "UniformError"
-  }
-}
-
-export class TextureError extends Error {
-  constructor(action: string, details: string) {
-    super(`Texture ${action} failed: ${details}`)
-    this.name = "TextureError"
-  }
-}
-
-export class CanvasError extends Error {
-  constructor(action: string, details: string) {
-    super(`Canvas ${action} failed: ${details}`)
-    this.name = "CanvasError"
-  }
-}
-
-type ErrorCategory =
+/**
+ * Context object for WebGL errors
+ */
+export type WebGLErrorType =
+  | "webgl"
   | "shader"
   | "program"
   | "buffer"
@@ -57,58 +24,195 @@ type ErrorCategory =
   | "canvas"
 
 /**
- * Categorizes errors by type (shader, program, buffer, attribute, uniform, texture, canvas)
- * and throws the appropriate specialized error class when `strict` mode is enabled.
- * In non-strict mode, returns `false` instead of throwing.
+ * Base class for all related errors
  *
  * **Parameters**
- * - `strict` – Whether to throw an error (`true`) or return `false` (`false`)
- * - `category` – Error category (`"shader" | "program" | "buffer" | "attribute" | "uniform" | "texture" | "canvas"`)
- * - `action` – The operation being performed (e.g. `"creation"`, `"compilation"`, `"validation"`)
- * - `details` – Human-readable description of why the operation failed
- * - `infoLog` – Optional WebGL info log string for additional context
- *
- * **Returns**
- * - `false` when `strict` is disabled (silent mode)
- * - Throws a category-specific error when `strict` is enabled
+ * - `subject` – Error subject (shader, program, buffer, attribute, uniform, texture, canvas)
+ * - `context` – Object containing error details, typed as `WebGLErrorContext`
  *
  * **Usage**
  * ```ts
- * // Silent mode: returns false if shader creation fails
- * if (!shader) {
- *   return handleError(false, "shader", "creation", "shader object is null")
- * }
+ * throw new WebGLError("shader", {
+ *   action: "compilation",
+ *   result: "GLSL source could not be compiled",
+ *   details: "unexpected token"
+ * })
+ * ```
  *
- * // Strict mode: throws ShaderError if compilation fails
- * if (!status) {
- *   const infoLog = context.getShaderInfoLog(shader) || "No compilation log available"
- *   handleError(true, "shader", "compilation", "GLSL source could not be compiled", infoLog)
- * }
+ * **Output**
+ * ```
+ * [shader error]
+ * - action    : compilation
+ * - result    : GLSL source could not be compiled
+ * - details   : unexpected token
+ * - file      : /src/shader.ts
+ * - line      : 42
+ * - column    : 13
  * ```
  */
-export function handleError(
-  strict: boolean,
-  category: ErrorCategory,
-  action: string,
-  details: string,
-  infoLog?: string
-): boolean {
+export class WebGLError extends Error {
+  constructor(subject: string, context: WebGLErrorContext) {
+    // Extract file, line, and column information from stack trace
+    const stack = new Error().stack?.split("\n")[2] || ""
+    const match = stack.match(/\((.*):(\d+):(\d+)\)/)
+
+    if (match) {
+      const [, file, line, column] = match
+      context.file = file
+      context.line = Number(line)
+      context.column = Number(column)
+    }
+
+    // Find the longest key length for alignment
+    const maxKeyLength = Math.max(...Object.keys(context).map(k => k.length))
+
+    // Build structured error message with aligned keys
+    const lines = [
+      `[${subject} error]`,
+      ...Object.entries(context).map(([key, value]) => {
+        const paddedKey = key.padEnd(maxKeyLength, " ")
+        return `- ${paddedKey} : ${value}`
+      })
+    ].join("\n")
+
+    super(lines)
+    this.name = "WebGLError"
+  }
+}
+
+/**
+ * Error thrown when a shader operation fails
+ */
+export class ShaderError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Shader", context)
+    this.name = "ShaderError"
+  }
+}
+
+/**
+ * Error thrown when a program operation fails
+ */
+export class ProgramError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Program", context)
+    this.name = "ProgramError"
+  }
+}
+
+/**
+ * Error thrown when a buffer operation fails
+ */
+export class BufferError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Buffer", context)
+    this.name = "BufferError"
+  }
+}
+
+/**
+ * Error thrown when an attribute operation fails
+ */
+export class AttributeError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Attribute", context)
+    this.name = "AttributeError"
+  }
+}
+
+/**
+ * Error thrown when a uniform operation fails
+ */
+export class UniformError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Uniform", context)
+    this.name = "UniformError"
+  }
+}
+
+/**
+ * Error thrown when a texture operation fails
+ */
+export class TextureError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Texture", context)
+    this.name = "TextureError"
+  }
+}
+
+/**
+ * Error thrown when a canvas operation fails
+ */
+export class CanvasError extends WebGLError {
+  constructor(context: WebGLErrorContext) {
+    super("Canvas", context)
+    this.name = "CanvasError"
+  }
+}
+
+/**
+ * Centralized error handling
+ *
+ * **Parameters**
+ * - `subject`  – Error subject (`"shader" | "program" | "buffer" | "attribute" | "uniform" | "texture" | "canvas" | "webgl"`)
+ * - `context`  – Error details object typed as `WebGLErrorContext`
+ * - `strict`   – Whether to throw an error (`true`) or return `false` (`false`)
+ *
+ * **Returns**
+ * - Throws a category-specific error when `strict` is enabled
+ * - Returns `false` when `strict` is disabled
+ *
+ * **Usage**
+ * ```ts
+ * // Shader error
+ * handleError({
+ *   subject: "shader",
+ *   context: {
+ *     action: "compilation",
+ *     result: "GLSL source could not be compiled",
+ *     details: "unexpected token"
+ *   },
+ *   strict: true
+ * })
+ *
+ * // General WebGL error (e.g. WebGL2 not supported)
+ * handleError({
+ *   subject: "webgl",
+ *   context: {
+ *     action: "initialization",
+ *     result: "WebGL2 not supported in this environment"
+ *   },
+ *   strict: true
+ * })
+ * ```
+ */
+export function handleError({
+  strict,
+  subject,
+  context
+}: {
+  strict: boolean
+  subject: WebGLErrorType
+  context: WebGLErrorContext
+}): boolean {
   if (strict) {
-    switch (category) {
+    switch (subject) {
       case "shader":
-        throw new ShaderError(action, details, infoLog)
+        throw new ShaderError(context)
       case "program":
-        throw new ProgramError(action, details, infoLog)
+        throw new ProgramError(context)
       case "buffer":
-        throw new BufferError(action, details)
+        throw new BufferError(context)
       case "attribute":
-        throw new AttributeError(action, details)
+        throw new AttributeError(context)
       case "uniform":
-        throw new UniformError(action, details)
+        throw new UniformError(context)
       case "texture":
-        throw new TextureError(action, details)
+        throw new TextureError(context)
       case "canvas":
-        throw new CanvasError(action, details)
+        throw new CanvasError(context)
+      case "webgl":
+        throw new WebGLError("WebGL", context)
     }
   }
   return false
