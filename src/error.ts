@@ -1,3 +1,6 @@
+import { parseSource } from "./utility/parse-source"
+import { parseContext } from "./utility/parse-context"
+
 /**
  * Context object for WebGL errors
  */
@@ -52,30 +55,13 @@ export type WebGLErrorType =
  */
 export class WebGLError extends Error {
   constructor(subject: string, context: WebGLErrorContext) {
-    // Extract file, line, and column information from stack trace
-    const stack = new Error().stack?.split("\n")[2] || ""
-    const match = stack.match(/\((.*):(\d+):(\d+)\)/)
-
-    if (match) {
-      const [, file, line, column] = match
-      context.file = file
-      context.line = Number(line)
-      context.column = Number(column)
-    }
-
-    // Find the longest key length for alignment
-    const maxKeyLength = Math.max(...Object.keys(context).map(k => k.length))
+    // Enrich context with file/line/column info
+    Object.assign(context, parseSource())
 
     // Build structured error message with aligned keys
-    const lines = [
-      `[${subject} error]`,
-      ...Object.entries(context).map(([key, value]) => {
-        const paddedKey = key.padEnd(maxKeyLength, " ")
-        return `- ${paddedKey} : ${value}`
-      })
-    ].join("\n")
+    const message = parseContext(subject, "error", context)
 
-    super(lines)
+    super(message)
     this.name = "WebGLError"
   }
 }
