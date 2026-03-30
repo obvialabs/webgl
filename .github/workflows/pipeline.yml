@@ -1,0 +1,196 @@
+# Workflow name
+name: WebGL Pipeline
+
+# Workflow conditions
+on:
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+  # Trigger workflow on pushes to main branch
+  push:
+    branches: [ main ]
+    # Trigger workflow on version tags (e.g., v1.2.3)
+    tags:
+      - 'v*.*.*'
+  # Trigger workflow on pull requests targeting main branch
+  pull_request:
+    branches: [ main ]
+
+# Permissions required for CodeQL and publishing
+permissions:
+  actions: read          # Allow reading workflow actions
+  contents: read         # Allow reading repository contents
+  security-events: write # Allow writing security scan results
+
+# Ensure only one workflow runs per ref at a time
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+# Workflow jobs
+jobs:
+  # Job (Build node 22.x)
+  build-node22:
+    # Job name shown in GitHub Actions UI
+    name: Publish package (Node 22.x)
+    # Runner environment (Ubuntu)
+    runs-on: ubuntu-latest
+    # Job steps
+    steps:
+      # Step 1: Checkout the repository code
+      - uses: actions/checkout@v4
+      # Step 2: Setup Node.js 22 environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Step 3: Install corepack globally
+      - name: Install corepack@0.31
+        run: npm install -g corepack@0.31
+      # Step 4: Enable corepack (pnpm support)
+      - name: Enable corepack
+        run: corepack enable
+      # Step 5: Install dependencies with pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Step 6: Build project
+      - name: Build package
+        run: pnpm build
+
+  # Job (Build node 23.x)
+  build-node23:
+    name: Publish package (Node 23.x)
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository code
+      - uses: actions/checkout@v4
+      # Step 2: Setup Node.js 23 environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+      # Step 3: Install corepack globally
+      - name: Install corepack@0.31
+        run: npm install -g corepack@0.31
+      # Step 4: Enable corepack (pnpm support)
+      - name: Enable corepack
+        run: corepack enable
+      # Step 5: Install dependencies with pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Step 6: Build project
+      - name: Build package
+        run: pnpm build
+
+  # Job (Build node 24.x)
+  build-node24:
+    name: Publish package (Node 24.x)
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository code
+      - uses: actions/checkout@v4
+      # Step 2: Setup Node.js 24 environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # Step 3: Install corepack globally
+      - name: Install corepack@0.31
+        run: npm install -g corepack@0.31
+      # Step 4: Enable corepack (pnpm support)
+      - name: Enable corepack
+        run: corepack enable
+      # Step 5: Install dependencies with pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Step 6: Build project
+      - name: Build package
+        run: pnpm build
+
+  # Job (Upload artifact)
+  upload-artifact:
+    name: Upload package (Artifact)
+    runs-on: ubuntu-latest
+    # Waits for all build jobs to finish
+    needs: [build-node22, build-node23, build-node24]
+    steps:
+      # Step 1: Checkout repository code
+      - uses: actions/checkout@v4
+      # Step 2: Upload build artifact (dist folder + metadata files)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: |
+            dist/
+            readme.md
+            package.json
+            license.md
+
+
+
+
+  # Job (Security check with CodeQL)
+  check:
+    name: Check security (CodeQL)
+    runs-on: ubuntu-latest
+    # Wait until upload-artifact job finishes
+    needs: upload-artifact
+    steps:
+      # Step 1: Checkout repository code
+      - uses: actions/checkout@v4
+      # Step 2: Download build artifact uploaded by previous job
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: .
+      # Step 3: Initialize CodeQL for JavaScript/TypeScript
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      # Step 4: Prepare artifact for analysis (list files)
+      - name: Prepare artifact for analysis
+        run: ls -R dist
+      # Step 5: Perform CodeQL analysis and upload results
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # Job (Publish to npm)
+  publish:
+    name: Publish package (NPM)
+    runs-on: ubuntu-latest
+    # Wait until upload-artifact job finishes
+    needs: upload-artifact
+    # Only run on version tags
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      # Step 1: Checkout repository code from main branch
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      # Step 2: Setup Node.js environment (fixed version for publishing)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # Step 3: Install corepack globally
+      - name: Install corepack@0.31
+        run: npm install -g corepack@0.31
+      # Step 4: Enable corepack (pnpm support)
+      - name: Enable corepack
+        run: corepack enable
+      # Step 5: Configure npm authentication using secret token
+      - name: Configure npm auth
+        run: npm config set //registry.npmjs.org/:_authToken="${NPM_TOKEN}"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Step 6: Download build artifact from previous job
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: .
+      # Step 7: Publish package to npm using artifact (no rebuild required)
+      - name: Publish to npm
+        run: pnpm publish dist --access public --no-git-checks
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
