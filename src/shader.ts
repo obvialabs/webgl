@@ -101,7 +101,11 @@ export function compileShader(
 
   if (!shader) {
     if (strict) {
-      throw new Error("Failed to create shader")
+      throw new Error(
+        "Shader compilation aborted: failed to create shader object. " +
+        "This may indicate insufficient GPU resources, unsupported shader type, " +
+        "or that the WebGL context is invalid."
+      )
     }
     return null
   }
@@ -112,13 +116,15 @@ export function compileShader(
   // Compile the shader source
   context.compileShader(shader)
 
-  // Check compilation status
-  if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
-    const infoLog = context.getShaderInfoLog(shader) || "Unknown error"
-    if (strict) {
-      throw new Error("Shader compilation failed: " + infoLog)
+  if (strict) {
+    // In strict mode, validate compilation result and throw if failed
+    validateShader(context, shader, { strict: true })
+  } else {
+    // In silent mode, just check status without throwing
+    const status = context.getShaderParameter(shader, context.COMPILE_STATUS)
+    if (!status) {
+      return null
     }
-    return null
   }
 
   return shader
@@ -152,7 +158,12 @@ export function deleteShader(
   // If shader is null and strict mode is enabled, throw an error
   if (!shader) {
     if (strict) {
-      throw new Error("Cannot delete WebGL shader: shader is null.")
+      throw new Error(
+        "Shader deletion failed: provided shader reference is null. " +
+        "This usually means the shader was never created successfully, " +
+        "has already been deleted, or the reference was lost. " +
+        "Ensure that compileShader returned a valid shader before attempting deletion."
+      )
     }
     return
   }
@@ -194,19 +205,32 @@ export function validateShader(
 ): boolean {
   const { strict = false } = options
 
+  // If shader is null, either throw (strict) or return false
   if (!shader) {
     if (strict) {
-      throw new Error("Cannot validate shader: shader is null.")
+      throw new Error(
+        "Shader validation failed: provided shader reference is null. " +
+        "This usually indicates that shader creation did not succeed or " +
+        "the shader object was already deleted."
+      )
     }
     return false
   }
 
+  // Query shader compilation status from WebGL
   const status = context.getShaderParameter(shader, context.COMPILE_STATUS)
 
+  // If compilation failed, either throw (strict) or return false
   if (!status && strict) {
-    const infoLog = context.getShaderInfoLog(shader) || "Unknown error"
-    throw new Error("Shader validation failed: " + infoLog)
+    const infoLog = context.getShaderInfoLog(shader) || "No compilation log available"
+    throw new Error(
+      "Shader validation failed: compilation did not succeed. " +
+      "Possible causes include syntax errors in GLSL source, " +
+      "unsupported features on the current GPU/driver, or exceeding resource limits. " +
+      "WebGL info log : " + infoLog
+    )
   }
 
+  // Return true if compiled successfully, false otherwise
   return !!status
 }

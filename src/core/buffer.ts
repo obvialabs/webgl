@@ -515,7 +515,7 @@ export function updateBuffer(
  * ```
  */
 export function updateBufferPartial(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   buffer: WebGLBuffer,
   options: BufferOptions & { offset?: number }
 ): void {
@@ -571,7 +571,7 @@ export function updateBufferPartial(
  * ```
  */
 export function deleteBuffer(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   buffer: WebGLBuffer | null,
   options: BaseOptions = {}
 ): void {

@@ -73,24 +73,25 @@ resizeCanvas(canvas, {
 
 ## Attributes
 
-By centralizing validation and using a consistent options‑object pattern, it reduces boilerplate,
-eliminates code duplication, and ensures a clean, predictable API for enabling, disabling,
-binding, and validating attributes.
+This section documents the helper functions for managing vertex attributes, including binding, enabling, disabling, and validating
 
 ### API
 
 #### bindAttribute
-Binds a vertex attribute to the currently bound buffer and defines how data is read.
+Binds a vertex attribute to the currently bound buffer and defines how data is read
 
-- `context` – WebGL rendering context
+- `context` – WebGL rendering context (WebGL1 or WebGL2)
 - `program` – Linked shader program
 - `options` – Attribute binding configuration
   - `name` – Attribute name in the shader
   - `size` – Number of components per attribute (e.g. 2 for vec2, 3 for vec3)
-  - `type` – Data type of each component (e.g. context.FLOAT)
+  - `type` – Data type of each component (e.g. `context.FLOAT`, `context.UNSIGNED_BYTE`)
   - `stride` – Byte offset between consecutive attributes (default: 0)
   - `offset` – Byte offset of the first component (default: 0)
   - `strict` – Throw error if attribute is not found (default: false)
+  - `normalize` – Normalize integer data values to [0,1] or [-1,1] (default: false, WebGL1 & WebGL2)
+  - `divisor` – Divisor for instanced rendering (default: 0, WebGL2 only)
+  - `integer` – Use integer attribute binding (`vertexAttribIPointer`) instead of float (default: false, WebGL2 only)
 
 ```ts
 // Silent mode (default): does nothing if attribute is missing
@@ -107,15 +108,39 @@ bindAttribute(context, program, {
   type: context.FLOAT,
   strict: true
 })
+
+// Normalize unsigned byte colors to [0,1]
+bindAttribute(context, program, {
+  name: "aColor",
+  size: 4,
+  type: context.UNSIGNED_BYTE,
+  normalize: true
+})
+
+// Integer attribute binding (WebGL2 only)
+bindAttribute(context, program, {
+  name: "aBoneIDs",
+  size: 4,
+  type: context.UNSIGNED_BYTE,
+  integer: true
+})
+
+// Instanced rendering (WebGL2 only)
+bindAttribute(context, program, {
+  name: "aOffset",
+  size: 2,
+  type: context.FLOAT,
+  divisor: 1
+})
 ```
 
 #### disableAttribute
-Disables a vertex attribute in the shader program.
+Disables a vertex attribute in the shader program
 
-- `context` – WebGL rendering context
+- `context` – WebGL rendering context (WebGL1 or WebGL2)
 - `program` – Linked shader program
 - `options` – Attribute disabling configuration
-  - `name` – Attribute name in the shader
+  - `name` – Attribute name in the shader (e.g. `"aTexCoord"`)
   - `strict` – Throw error if attribute is not found (default: false)
 
 ```ts
@@ -127,12 +152,12 @@ disableAttribute(context, program, { name: "aTexCoord", strict: true })
 ```
 
 #### enableAttribute
-Enables a vertex attribute in the shader program.
+Enables a vertex attribute in the shader program
 
-- `context` – WebGL rendering context
+- `context` – WebGL rendering context (WebGL1 or WebGL2)
 - `program` – Linked shader program
 - `options` – Attribute enabling configuration
-  - `name` – Attribute name in the shader
+  - `name` – Attribute name in the shader (e.g. `"aPosition"`)
   - `strict` – Throw error if attribute is not found (default: false)
 
 ```ts
@@ -146,10 +171,10 @@ enableAttribute(context, program, { name: "aPosition", strict: true })
 #### validateAttribute
 Checks whether an attribute exists in the shader program and returns its location
 
-- `context` – WebGL rendering context
+- `context` – WebGL rendering context (WebGL1 or WebGL2)
 - `program` – Linked shader program
 - `options` – Validation configuration
-  - `name` – Attribute name in the shader
+  - `name` – Attribute name in the shader (e.g. `"aPosition"`)
   - `strict` – Throw error if attribute is not found (default: false)
 
 ```ts
@@ -160,7 +185,10 @@ if (location !== -1) {
 }
 
 // Strict mode: throws an error if attribute is missing
-const locationStrict = validateAttribute(context, program, { name: "aPosition", strict: true })
+const locationStrict = validateAttribute(context, program, {
+  name: "aPosition",
+  strict: true
+})
 ```
 
 ## Buffers

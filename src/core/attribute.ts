@@ -32,59 +32,122 @@ export interface BindAttributeOptions extends BaseOptions {
    * @default 0
    */
   offset?: number
+
+  /**
+   * Normalize integer data values to [0,1] or [-1,1]
+   *
+   * @default false
+   */
+  normalize?: boolean
+
+  /**
+   * Divisor for instanced rendering (WebGL2 only)
+   *
+   * @default 0
+   */
+  divisor?: number
+
+  /**
+   * Use integer attribute binding (WebGL2 only)
+   *
+   * @default false
+   */
+  integer?: boolean
 }
 
 /**
  * Bind a vertex attribute to the currently bound buffer
  *
  * **Parameters**
- * - `context` – Target WebGL rendering context
+ * - `context` – Target WebGL rendering context (WebGL1 or WebGL2)
  * - `program` – Linked shader program
  * - `options` – Attribute binding configuration
- *    - `name` – Attribute name in the shader
+ *    - `name` – Attribute name in the shader (e.g. "aPosition")
  *    - `size` – Number of components per attribute (e.g. 2 for vec2, 3 for vec3)
- *    - `type` – Data type of each component (e.g. context.FLOAT)
+ *    - `type` – Data type of each component (e.g. context.FLOAT, context.UNSIGNED_BYTE)
  *    - `stride` – Byte offset between consecutive attributes (optional, default: 0)
  *    - `offset` – Byte offset of the first component (optional, default: 0)
  *    - `strict` – Throw error if attribute is not found (optional, default: false)
+ *    - `normalize` – Normalize integer data values to [0,1] or [-1,1] (optional, default: false, WebGL1 & WebGL2)
+ *    - `divisor` – Divisor for instanced rendering (optional, default: 0, WebGL2 only)
+ *    - `integer` – Use integer attribute binding (`vertexAttribIPointer`) instead of float (optional, default: false, WebGL2 only)
  *
  * **Usage**
  * ```ts
  * // Vertex shader example:
  * // attribute vec3 aPosition;
  *
- * // Bind the "aPosition" attribute to a buffer
+ * // Bind the "aPosition" attribute to a buffer (float attribute)
  * bindAttribute(context, program, { name: "aPosition", size: 3, type: context.FLOAT })
  *
  * // Enforce strict mode: throw error if missing
- * bindAttribute(context, program, { name: "aPosition", size: 3, type: context.FLOAT, strict: true })
+ * bindAttribute(context, program, {
+ *   name: "aPosition",
+ *   size: 3,
+ *   type: context.FLOAT,
+ *   strict: true
+ * })
+ *
+ * // Normalize unsigned byte colors to [0,1]
+ * bindAttribute(context, program, {
+ *   name: "aColor",
+ *   size: 4,
+ *   type: context.UNSIGNED_BYTE,
+ *   normalize: true
+ * })
+ *
+ * // Integer attribute binding (WebGL2 only)
+ * // attribute ivec4 aBoneIDs;
+ * bindAttribute(context, program, {
+ *   name: "aBoneIDs",
+ *   size: 4,
+ *   type: context.UNSIGNED_BYTE,
+ *   integer: true
+ * })
+ *
+ * // Instanced rendering (WebGL2 only)
+ * bindAttribute(context, program, {
+ *   name: "aOffset",
+ *   size: 2,
+ *   type: context.FLOAT,
+ *   divisor: 1
+ * })
  * ```
  */
 export function bindAttribute(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   program: WebGLProgram,
   options: BindAttributeOptions
 ): void {
-  // Destructure options for clarity and consistency
   const {
     name,
     size,
     type,
     stride = 0,
     offset = 0,
-    strict = false
+    divisor = 0,
+    normalize = false,
+    strict = false,
+    integer = false
   } = options
 
-  // Validate attribute location using shared helper
   const location = validateAttribute(context, program, { name, strict })
 
-  // If attribute is valid, bind it
   if (location !== -1) {
-    // Enable the vertex attribute array at the resolved location
     context.enableVertexAttribArray(location)
 
-    // Define how the attribute data is read from the currently bound buffer
-    context.vertexAttribPointer(location, size, type, false, stride, offset)
+    if (integer && "vertexAttribIPointer" in context) {
+      // WebGL2 integer attribute binding
+      context.vertexAttribIPointer(location, size, type, stride, offset)
+    } else {
+      // Default float attribute binding
+      context.vertexAttribPointer(location, size, type, normalize, stride, offset)
+    }
+
+    // WebGL2 instanced rendering support
+    if ("vertexAttribDivisor" in context && divisor > 0) {
+      context.vertexAttribDivisor(location, divisor)
+    }
   }
 }
 
@@ -102,7 +165,7 @@ export interface EnableAttributeOptions extends BaseOptions {
  * Enable a vertex attribute
  *
  * **Parameters**
- * - `context` – Target WebGL rendering context
+ * - `context` – Target WebGL rendering context (WebGL1 or WebGL2)
  * - `program` – Linked shader program
  * - `options` – Attribute enabling configuration
  *    - `name` – Attribute name in the shader
@@ -118,7 +181,7 @@ export interface EnableAttributeOptions extends BaseOptions {
  * ```
  */
 export function enableAttribute(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   program: WebGLProgram,
   options: EnableAttributeOptions
 ): void {
@@ -136,7 +199,7 @@ export function enableAttribute(
  */
 export interface DisableAttributeOptions extends BaseOptions {
   /**
-   * Attribute name in the shader
+   * Attribute name in the shader (e.g. "aTexCoord")
    */
   name: string
 }
@@ -145,7 +208,7 @@ export interface DisableAttributeOptions extends BaseOptions {
  * Disable a vertex attribute
  *
  * **Parameters**
- * - `context` – Target WebGL rendering context
+ * - `context` – Target WebGL rendering context (WebGL1 or WebGL2)
  * - `program` – Linked shader program
  * - `options` – Attribute disabling configuration
  *    - `name` – Attribute name in the shader
@@ -161,7 +224,7 @@ export interface DisableAttributeOptions extends BaseOptions {
  * ```
  */
 export function disableAttribute(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   program: WebGLProgram,
   options: DisableAttributeOptions
 ): void {
@@ -179,7 +242,7 @@ export function disableAttribute(
  */
 export interface ValidateAttributeOptions extends BaseOptions {
   /**
-   * Attribute name in the shader
+   * Attribute name in the shader (e.g. "aPosition")
    */
   name: string
 }
@@ -188,11 +251,11 @@ export interface ValidateAttributeOptions extends BaseOptions {
  * Validate a vertex attribute by checking its location
  *
  * **Parameters**
- * - `context` – Target WebGL rendering context
+ * - `context` – Target WebGL rendering context (WebGL1 or WebGL2)
  * - `program` – Linked shader program
  * - `options` – Validation configuration
  *    - `name` – Attribute name in the shader
- *    - `strict` – Throw error if attribute is not found (optional)
+ *    - `strict` – Throw error if attribute is not found (optional, default: false)
  *
  * **Usage**
  * ```ts
@@ -200,11 +263,14 @@ export interface ValidateAttributeOptions extends BaseOptions {
  * const location = validateAttribute(context, program, { name: "aPosition" })
  *
  * // Enforce strict mode
- * const location = validateAttribute(context, program, { name: "aPosition", strict: true })
+ * const location = validateAttribute(context, program, {
+ *   name: "aPosition",
+ *   strict: true
+ * })
  * ```
  */
 export function validateAttribute(
-  context: WebGLRenderingContext,
+  context: WebGLRenderingContext | WebGL2RenderingContext,
   program: WebGLProgram,
   options: ValidateAttributeOptions
 ): number {
