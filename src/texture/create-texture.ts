@@ -48,7 +48,7 @@ export interface TextureOptions extends WebGLTexture {
  * ```
  */
 export function createTexture2D(
-  gl: WebGLRenderingContext,
+  gl: WebGLRenderingContext | WebGL2RenderingContext,
   image: TexImageSource,
   options: TextureOptions = {}
 ): WebGLTexture {
@@ -80,58 +80,4 @@ export function createTexture2D(
 
   gl.bindTexture(gl.TEXTURE_2D, null)
   return texture
-}
-
-/**
- * Set texture parameters (wrapping and filtering)
- *
- * **Parameters**
- * - `gl` – Target WebGL rendering context
- * - `target` – Texture target (e.g. `gl.TEXTURE_2D`)
- * - `wrapS` – Horizontal wrapping mode (default: `gl.CLAMP_TO_EDGE`)
- * - `wrapT` – Vertical wrapping mode (default: `gl.CLAMP_TO_EDGE`)
- * - `minFilter` – Minification filter (default: `gl.LINEAR`)
- * - `magFilter` – Magnification filter (default: `gl.LINEAR`)
- *
- * **Usage**
- * ```ts
- * gl.bindTexture(gl.TEXTURE_2D, texture)
- * setTextureParameters(gl, gl.TEXTURE_2D, gl.REPEAT, gl.REPEAT, gl.NEAREST, gl.NEAREST)
- * ```
- */
-export function setTextureParameters(
-  gl: WebGLRenderingContext,
-  target: number,
-  wrapS: number = gl.CLAMP_TO_EDGE,
-  wrapT: number = gl.CLAMP_TO_EDGE,
-  minFilter: number = gl.LINEAR,
-  magFilter: number = gl.LINEAR
-): void {
-  gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
-  gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
-  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, minFilter)
-  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, magFilter)
-}
-
-/**
- * Update an existing texture with new image data
- *
- * **Parameters**
- * - `gl` – Target WebGL rendering context
- * - `texture` – Existing WebGLTexture
- * - `image` – New source image
- *
- * **Usage**
- * ```ts
- * updateTexture(gl, texture, videoElement)
- * ```
- */
-export function updateTexture(
-  gl: WebGLRenderingContext,
-  texture: WebGLTexture,
-  image: TexImageSource
-): void {
-  gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-  gl.bindTexture(gl.TEXTURE_2D, null)
 }
