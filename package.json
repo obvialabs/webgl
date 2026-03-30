@@ -5,7 +5,7 @@
   "keywords"          : ["webgl", "graphics", "gpu", "shader", "program", "buffer", "attribute", "texture", "uniform", "rendering", "3d", "canvas", "utilities", "helpers", "type-safe", "modular", "lightweight", "obvia"],
   "license"           : "MIT",
   "homepage"          : "https://obvia.studio/",
-  "version"           : "0.5.0",
+  "version"           : "0.6.0",
 
   "author"            : {
     "name"  : "Selçuk Çukur",
@@ -26,8 +26,8 @@
     "clean"     : "rimraf node_modules dist .turbo"
   },
 
-  "types"             : "./dist/index.d.mts",
-  "main"              : "./dist/index.mjs",
+  "types"             : "./dist/index.d.ts",
+  "main"              : "./dist/index.cjs",
   "module"            : "./dist/index.mjs",
 
   "dependencies"      : {},
@@ -46,49 +46,49 @@
 
   "exports"           : {
     "."           : {
-      "types"   : "./dist/index.d.mts",
+      "types"   : "./dist/index.d.ts",
       "import"  : "./dist/index.mjs",
-      "require" : "./dist/index.mjs"
+      "require" : "./dist/index.cjs"
     },
     "./attribute" : {
-      "types"   : "./dist/attribute/index.d.mts",
+      "types"   : "./dist/attribute/index.d.ts",
       "import"  : "./dist/attribute/index.mjs",
-      "require" : "./dist/attribute/index.mjs"
+      "require" : "./dist/attribute/index.cjs"
     },
     "./buffer"    : {
-      "types"   : "./dist/buffer/index.d.mts",
+      "types"   : "./dist/buffer/index.d.ts",
       "import"  : "./dist/buffer/index.mjs",
-      "require" : "./dist/buffer/index.mjs"
+      "require" : "./dist/buffer/index.cjs"
     },
     "./canvas"    : {
-      "types"   : "./dist/canvas/index.d.mts",
+      "types"   : "./dist/canvas/index.d.ts",
       "import"  : "./dist/canvas/index.mjs",
-      "require" : "./dist/canvas/index.mjs"
+      "require" : "./dist/canvas/index.cjs"
     },
     "./context"   : {
-      "types"   : "./dist/context/index.d.mts",
+      "types"   : "./dist/context/index.d.ts",
       "import"  : "./dist/context/index.mjs",
-      "require" : "./dist/context/index.mjs"
+      "require" : "./dist/context/index.cjs"
     },
     "./program"   : {
-      "types"   : "./dist/program/index.d.mts",
+      "types"   : "./dist/program/index.d.ts",
       "import"  : "./dist/program/index.mjs",
-      "require" : "./dist/program/index.mjs"
+      "require" : "./dist/program/index.cjs"
     },
     "./shader"    : {
-      "types"   : "./dist/shader/index.d.mts",
+      "types"   : "./dist/shader/index.d.ts",
       "import"  : "./dist/shader/index.mjs",
-      "require" : "./dist/shader/index.mjs"
+      "require" : "./dist/shader/index.cjs"
     },
     "./texture"   : {
-      "types"   : "./dist/texture/index.d.mts",
+      "types"   : "./dist/texture/index.d.ts",
       "import"  : "./dist/texture/index.mjs",
-      "require" : "./dist/texture/index.mjs"
+      "require" : "./dist/texture/index.cjs"
     },
     "./uniform"   : {
-      "types"   : "./dist/uniform/index.d.mts",
+      "types"   : "./dist/uniform/index.d.ts",
       "import"  : "./dist/uniform/index.mjs",
-      "require" : "./dist/uniform/index.mjs"
+      "require" : "./dist/uniform/index.cjs"
     }
   },
   "files"             : ["dist", "readme.md", "license.md"],
