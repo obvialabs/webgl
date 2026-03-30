@@ -1,6 +1,6 @@
 import type { BaseOptions } from "../option"
-
 import { validateAttribute } from "../attribute"
+import { handleWarning } from "../utility/handle-warning"
 
 /**
  * Configuration options for enabling a vertex attribute
@@ -39,8 +39,18 @@ export function enableAttribute(
   // Validate attribute location using shared helper
   const location = validateAttribute(context, program, options)
 
-  // If attribute is valid, enable it
   if (location !== -1) {
+    // If attribute is valid, enable it
     context.enableVertexAttribArray(location)
+  } else if (options.strict) {
+    // If strict mode is enabled and attribute is missing → delegate to handleWarning
+    handleWarning({
+      subject : "attribute",
+      context : {
+        action  : "enable",
+        result  : `Attribute "${options.name}" not found in program`
+      },
+      strict  : true
+    })
   }
 }
