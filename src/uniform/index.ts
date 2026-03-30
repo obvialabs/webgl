@@ -7,3 +7,4 @@ export { setUniformSampler, type UniformSamplerOptions } from "./set-uniform-sam
 export { setUniformBlock, type UniformBlockOptions } from "./set-uniform-block"
 export { setUniformBuffer, type UniformBufferOptions } from "./set-uniform-buffer"
 export { setUniformMatrix, type UniformMatrixOptions } from "./set-uniform-matrix"
+export { setUniformUi, type UniformUiOptions } from "./set-uniform-ui"

@@ -5,7 +5,7 @@
   "keywords"          : ["webgl", "graphics", "gpu", "shader", "program", "buffer", "attribute", "texture", "uniform", "rendering", "3d", "canvas", "utilities", "helpers", "type-safe", "modular", "lightweight", "obvia"],
   "license"           : "MIT",
   "homepage"          : "https://obvia.studio/",
-  "version"           : "0.0.1",
+  "version"           : "0.5.0",
 
   "author"            : {
     "name"  : "Selçuk Çukur",
